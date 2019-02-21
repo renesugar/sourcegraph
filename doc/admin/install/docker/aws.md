@@ -24,17 +24,17 @@ If you're just starting out, we recommend [installing Sourcegraph locally](index
   # Create the directory structure for Sourcegraph data
   - mkdir -p /home/ec2-user/.sourcegraph/config
   - mkdir -p /home/ec2-user/.sourcegraph/data
-  
+
   # Install, configure, and enable Docker
   - yum update -y
   - amazon-linux-extras install docker
-  - systemctl enable --now --no-block docker 
+  - systemctl enable --now --no-block docker
   - sed -i -e 's/1024/10240/g' /etc/sysconfig/docker
   - sed -i -e 's/4096/40960/g' /etc/sysconfig/docker
   - usermod -a -G docker ec2-user
 
   # Install and run Sourcegraph. Restart the container upon subsequent reboots
-  - [ sh, -c, 'docker run -d --publish 80:7080 --publish 443:7443 --publish 2633:2633 --restart unless-stopped --volume /home/ec2-user/.sourcegraph/config:/etc/sourcegraph --volume /home/ec2-user/.sourcegraph/data:/var/opt/sourcegraph sourcegraph/server:3.0.1' ]
+  - [ sh, -c, 'docker run -d --publish 80:7080 --publish 443:7443 --publish 2633:2633 --restart unless-stopped --volume /home/ec2-user/.sourcegraph/config:/etc/sourcegraph --volume /home/ec2-user/.sourcegraph/data:/var/opt/sourcegraph sourcegraph/server:3.1.1' ]
   ```
 
 - Select **Next: ...** until you get to the **Configure Security Group** page, then add the default **HTTP** rule (port range "80", source "0.0.0.0/0, ::/0")
@@ -68,7 +68,5 @@ docker run docker run -d --publish 80:7080 --publish 443:7443 --publish 2633:263
 ## Using an external database for persistence
 
 The Docker container has its own internal PostgreSQL and Redis databases. To preserve this data when you kill and recreate the container, you can [use external databases](../../external_database.md) for persistence, such as [AWS RDS for PostgreSQL](https://aws.amazon.com/rds/) and [Amazon ElastiCache](https://aws.amazon.com/elasticache/redis/).
-
-The [site configuration JSON](../../site_config/index.md) is not yet stored in the database, so you must manually back it up. This will no longer be necessary in [Sourcegraph 3.0](https://github.com/sourcegraph/about/pull/36). <!-- TODO: remove this when https://github.com/sourcegraph/about/pull/36 is merged -->
 
 > NOTE: Use of external databases requires [Sourcegraph Enterprise](https://about.sourcegraph.com/pricing).

@@ -8,6 +8,7 @@ import (
 	"fmt"
 )
 
+// AWSCodeCommitConnection description: Configuration for a connection to AWS CodeCommit.
 type AWSCodeCommitConnection struct {
 	AccessKeyID                 string `json:"accessKeyID"`
 	InitialRepositoryEnablement bool   `json:"initialRepositoryEnablement,omitempty"`
@@ -79,6 +80,7 @@ func (v *AuthProviders) UnmarshalJSON(data []byte) error {
 	return fmt.Errorf("tagged union type must have a %q property whose value is one of %s", "type", []string{"builtin", "saml", "openidconnect", "http-header", "github", "gitlab"})
 }
 
+// BitbucketServerConnection description: Configuration for a connection to Bitbucket Server.
 type BitbucketServerConnection struct {
 	Certificate                 string `json:"certificate,omitempty"`
 	ExcludePersonalRepositories bool   `json:"excludePersonalRepositories,omitempty"`
@@ -141,6 +143,12 @@ type Extensions struct {
 	Disabled              *bool       `json:"disabled,omitempty"`
 	RemoteRegistry        interface{} `json:"remoteRegistry,omitempty"`
 }
+type ExternalIdentity struct {
+	AuthProviderID   string `json:"authProviderID"`
+	AuthProviderType string `json:"authProviderType"`
+	GitlabProvider   string `json:"gitlabProvider"`
+	Type             string `json:"type"`
+}
 
 // GitHubAuthProvider description: Configures the GitHub (or GitHub Enterprise) OAuth authentication provider for SSO. In addition to specifying this configuration object, you must also create a OAuth App on your GitHub instance: https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/. When a user signs into Sourcegraph or links their GitHub account to their existing Sourcegraph account, GitHub will prompt the user for the repo scope.
 type GitHubAuthProvider struct {
@@ -156,6 +164,8 @@ type GitHubAuthProvider struct {
 type GitHubAuthorization struct {
 	Ttl string `json:"ttl,omitempty"`
 }
+
+// GitHubConnection description: Configuration for a connection to GitHub or GitHub Enterprise.
 type GitHubConnection struct {
 	Authorization               *GitHubAuthorization `json:"authorization,omitempty"`
 	Certificate                 string               `json:"certificate,omitempty"`
@@ -179,8 +189,11 @@ type GitLabAuthProvider struct {
 
 // GitLabAuthorization description: If non-null, enforces GitLab repository permissions. This requires that there be an item in the `auth.providers` field of type "gitlab" with the same `url` field as specified in this `GitLabConnection`.
 type GitLabAuthorization struct {
-	Ttl string `json:"ttl,omitempty"`
+	IdentityProvider IdentityProvider `json:"identityProvider"`
+	Ttl              string           `json:"ttl,omitempty"`
 }
+
+// GitLabConnection description: Configuration for a connection to GitLab (GitLab.com or GitLab self-managed).
 type GitLabConnection struct {
 	Authorization               *GitLabAuthorization `json:"authorization,omitempty"`
 	Certificate                 string               `json:"certificate,omitempty"`
@@ -191,6 +204,8 @@ type GitLabConnection struct {
 	Token                       string               `json:"token"`
 	Url                         string               `json:"url"`
 }
+
+// GitoliteConnection description: Configuration for a connection to Gitolite.
 type GitoliteConnection struct {
 	Blacklist                  string       `json:"blacklist,omitempty"`
 	Host                       string       `json:"host"`
@@ -214,9 +229,49 @@ type IMAPServerConfig struct {
 	Username string `json:"username,omitempty"`
 }
 
+// IdentityProvider description: The source of identity to use when computing permissions. This defines how to compute the GitLab identity to use for a given Sourcegraph user.
+type IdentityProvider struct {
+	Oauth    *OAuthIdentity
+	Username *UsernameIdentity
+	External *ExternalIdentity
+}
+
+func (v IdentityProvider) MarshalJSON() ([]byte, error) {
+	if v.Oauth != nil {
+		return json.Marshal(v.Oauth)
+	}
+	if v.Username != nil {
+		return json.Marshal(v.Username)
+	}
+	if v.External != nil {
+		return json.Marshal(v.External)
+	}
+	return nil, errors.New("tagged union type must have exactly 1 non-nil field value")
+}
+func (v *IdentityProvider) UnmarshalJSON(data []byte) error {
+	var d struct {
+		DiscriminantProperty string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &d); err != nil {
+		return err
+	}
+	switch d.DiscriminantProperty {
+	case "external":
+		return json.Unmarshal(data, &v.External)
+	case "oauth":
+		return json.Unmarshal(data, &v.Oauth)
+	case "username":
+		return json.Unmarshal(data, &v.Username)
+	}
+	return fmt.Errorf("tagged union type must have a %q property whose value is one of %s", "type", []string{"oauth", "username", "external"})
+}
+
 // Log description: Configuration for logging and alerting, including to external services.
 type Log struct {
 	Sentry *Sentry `json:"sentry,omitempty"`
+}
+type OAuthIdentity struct {
+	Type string `json:"type"`
 }
 
 // OpenIDConnectAuthProvider description: Configures the OpenID Connect authentication provider for SSO.
@@ -230,7 +285,7 @@ type OpenIDConnectAuthProvider struct {
 	Type               string `json:"type"`
 }
 
-// OtherExternalServiceConnection description: Connection to Git repositories for which an external service integration isn't yet available.
+// OtherExternalServiceConnection description: Configuration for a Connection to Git repositories for which an external service integration isn't yet available.
 type OtherExternalServiceConnection struct {
 	Repos []string `json:"repos"`
 	Url   string   `json:"url,omitempty"`
@@ -246,6 +301,8 @@ type Phabricator struct {
 	CallsignCommand string `json:"callsignCommand"`
 	Url             string `json:"url"`
 }
+
+// PhabricatorConnection description: Configuration for a connection to Phabricator.
 type PhabricatorConnection struct {
 	Repos []*Repos `json:"repos,omitempty"`
 	Token string   `json:"token,omitempty"`
@@ -339,4 +396,7 @@ type SiteConfiguration struct {
 // SlackNotificationsConfig description: Configuration for sending notifications to Slack.
 type SlackNotificationsConfig struct {
 	WebhookURL string `json:"webhookURL"`
+}
+type UsernameIdentity struct {
+	Type string `json:"type"`
 }

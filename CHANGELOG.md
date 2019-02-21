@@ -9,25 +9,44 @@ All notable changes to Sourcegraph are documented in this file.
 
 ### Added
 
-- Added Docker-specific help text when running the Sourcegraph docker image in an environment with an sufficient open file descriptor limit.
-- Added syntax highlighting for Kotlin and Dart.
-- Added `auth.disableUsernameChanges` to critical configuration to prevent users from changing their usernames.
-
 ### Changed
 
-- File match search results now show full repo name if there are results from mirrors on different code hosts (e.g. github.com/sourcegraph/sourcegraph and gitlab.com/sourcegraph/sourcegraph)
-- Search queries now use "smart case" by default. Searches are case insensitive unless you use uppercase letters. To explicitely set the case, you can still use the `case` field (e.g. `case:yes`, `case:no`). To explicitely set smart case, use `case:auto`.
-- File match search results now show full repo name if there are results from
-  mirrors on different code hosts (e.g. github.com/sourcegraph/sourcegraph and
-  gitlab.com/sourcegraph/sourcegraph)
 - Common regexp search mistakes are now automattically fixed ([see this issue
   for more info.](https://github.com/sourcegraph/sourcegraph/issues/2125))
 
 ### Fixed
 
-- Fixed an issue where the management console would improperly regenerate the TLS cert/key unless `CUSTOM_TLS=true` was set. See the documentation for [how to use your own TLS certificate with the management console](doc/admin/management_console.md#how-can-i-use-my-own-tls-certificates-with-the-management-console).
-
 ### Removed
+
+## 3.1.1
+
+### Added
+
+- Query builder toggle (open/closed) state is now retained.
+
+### Fixed
+
+- Fixed an issue where single-term values entered into the "Exact match" field in the query builder were not getting wrapped in quotes.
+
+## 3.1.0
+
+### Added
+
+- Added Docker-specific help text when running the Sourcegraph docker image in an environment with an sufficient open file descriptor limit.
+- Added syntax highlighting for Kotlin and Dart.
+- Added a management console environment variable to disable HTTPS, see [the docs](doc/admin/management_console.md#can-i-disable-https-on-the-management-console) for more information.
+- Added `auth.disableUsernameChanges` to critical configuration to prevent users from changing their usernames.
+- Site admins can query a user by email address or username from the GraphQL API.
+- Added a search query builder to the main search page. Click "Use search query builder" to open the query builder, which is a form with separate inputs for commonly used search keywords.
+
+### Changed
+
+- File match search results now show full repository name if there are results from mirrors on different code hosts (e.g. github.com/sourcegraph/sourcegraph and gitlab.com/sourcegraph/sourcegraph)
+- Search queries now use "smart case" by default. Searches are case insensitive unless you use uppercase letters. To explicitly set the case, you can still use the `case` field (e.g. `case:yes`, `case:no`). To explicitly set smart case, use `case:auto`.
+
+### Fixed
+
+- Fixed an issue where the management console would improperly regenerate the TLS cert/key unless `CUSTOM_TLS=true` was set. See the documentation for [how to use your own TLS certificate with the management console](doc/admin/management_console.md#how-can-i-use-my-own-tls-certificates-with-the-management-console).
 
 ## 3.0.1
 

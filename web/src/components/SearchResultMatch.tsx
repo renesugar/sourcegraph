@@ -63,23 +63,23 @@ export class SearchResultMatch extends React.Component<SearchResultMatchProps, S
                             : renderMarkdown({ markdown: props.item.body.text })
                     ),
                     switchMap(markdownHTML => {
-                        if (this.bodyIsCode() && markdownHTML.includes('<code') && markdownHTML.includes('</code>')) {
+                        if (this.bodyIsCode()) {
                             const lang = this.getLanguage() || 'txt'
                             const parser = new DOMParser()
-                            // Get content between the outermost code tags.
-                            const codeContent = parser
-                                .parseFromString(markdownHTML, 'text/html')
-                                .querySelector('code')!
-                                .innerHTML.toString()
+                            // Extract the text content of the result.
+                            const codeContent = parser.parseFromString(markdownHTML, 'text/html').body.innerText
                             if (codeContent) {
                                 return highlightCode({
-                                    code: decode(codeContent),
+                                    code: codeContent,
                                     fuzzyLanguage: lang,
                                     disableTimeout: false,
                                     isLightTheme: this.props.isLightTheme,
                                 }).pipe(
                                     switchMap(highlightedStr => {
-                                        const highlightedMarkdown = markdownHTML.replace(codeContent, highlightedStr)
+                                        const highlightedMarkdown = decode(markdownHTML).replace(
+                                            codeContent,
+                                            highlightedStr
+                                        )
                                         return of(highlightedMarkdown)
                                     }),
                                     // Return the rendered markdown if highlighting fails.
@@ -164,13 +164,21 @@ export class SearchResultMatch extends React.Component<SearchResultMatchProps, S
                 <>
                     {this.state.HTML && (
                         <Link key={this.props.item.url} to={this.props.item.url} className="search-result-match">
-                            <Markdown
-                                refFn={this.setTableContainerElement}
-                                className={`search-result-match__markdown ${
-                                    this.bodyIsCode() ? 'search-result-match__code-excerpt' : ''
-                                }`}
-                                dangerousInnerHTML={this.state.HTML}
-                            />
+                            {this.bodyIsCode ? (
+                                <code>
+                                    <Markdown
+                                        refFn={this.setTableContainerElement}
+                                        className={`search-result-match__markdown ${'search-result-match__code-excerpt'}`}
+                                        dangerousInnerHTML={this.state.HTML}
+                                    />
+                                </code>
+                            ) : (
+                                <Markdown
+                                    refFn={this.setTableContainerElement}
+                                    className={`search-result-match__markdown`}
+                                    dangerousInnerHTML={this.state.HTML}
+                                />
+                            )}
                         </Link>
                     )}
                     {!this.state.HTML && (

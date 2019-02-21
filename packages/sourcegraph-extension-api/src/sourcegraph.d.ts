@@ -21,26 +21,9 @@ declare module 'sourcegraph' {
      * @deprecated In the future the API will use the [native `URL` API](https://developer.mozilla.org/en-US/docs/Web/API/URL)
      */
     export class URI {
-        /**
-         * @deprecated In the future the API will use the [native `URL` API](https://developer.mozilla.org/en-US/docs/Web/API/URL), which does not contain this method.
-         */
-        static parse(value: string): URI
-
-        /**
-         * @deprecated In the future the API will use the [native `URL` API](https://developer.mozilla.org/en-US/docs/Web/API/URL), which does not contain this method.
-         */
-        static file(path: string): URI
-
         constructor(value: string)
 
         toString(): string
-
-        /**
-         * Returns a JSON representation of this Uri.
-         *
-         * @deprecated In the future the API will use the [native `URL` API](https://developer.mozilla.org/en-US/docs/Web/API/URL), which returns a string instead of an object.
-         */
-        toJSON(): any
     }
 
     export class Position {
@@ -876,19 +859,6 @@ declare module 'sourcegraph' {
          * position or the current position itself.
          */
         range?: Range
-
-        /**
-         * The priority for this hover, which determines whether it is shown and the order in which
-         * it is shown. Hovers with higher priorities are shown first.
-         *
-         * If undefined, the hover is always shown. If this hover's priority is a negative number
-         * and there is another hover for the same position with a greater priority, this hover is
-         * not shown.
-         *
-         * For example, "fuzzy" or "imprecise" hovers can have negative priorities to ensure they
-         * will not be displayed if there is a more precise hover available.
-         */
-        priority?: number
     }
 
     export interface HoverProvider {
