@@ -13,7 +13,14 @@ interface ActivationChecklistItemProps extends ActivationStep {
  * A single item in the activation checklist.
  */
 export class ActivationChecklistItem extends React.PureComponent<ActivationChecklistItemProps, {}> {
-    private doAction = () => this.props.action(this.props.history)
+    private doAction = () => {
+        try {
+            console.log('# HERE')
+            this.props.action(this.props.history)
+        } catch (e) {
+            console.log('# e', e)
+        }
+    }
 
     public render(): JSX.Element {
         return (

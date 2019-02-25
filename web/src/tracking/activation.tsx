@@ -3,7 +3,7 @@ import { pick } from 'lodash'
 import { Observable } from 'rxjs'
 import { first, map } from 'rxjs/operators'
 import { ActivationStatus, ActivationStep } from '../../../shared/src/components/activation/Activation'
-import { dataAndErrors, dataOrThrowErrors, gql } from '../../../shared/src/graphql/graphql'
+import { dataOrThrowErrors, gql } from '../../../shared/src/graphql/graphql'
 import * as GQL from '../../../shared/src/graphql/schema'
 import { queryGraphQL } from '../backend/graphql'
 import { logUserEvent } from '../user/account/backend'
@@ -24,12 +24,9 @@ const fetchReferencesLink: () => Observable<string | null> = () =>
             }
         }
     `).pipe(
-        map(dataAndErrors),
-        map(dataAndErrors => {
-            if (!dataAndErrors.data) {
-                return null
-            }
-            const data = dataAndErrors.data
+        map(dataOrThrowErrors),
+        map(data => {
+            console.log('# HERE 2', data)
             if (!data.repositories.nodes) {
                 return null
             }
@@ -137,7 +134,13 @@ export const createActivationStatus = (isSiteAdmin: boolean) => {
                 action: (h: H.History) =>
                     fetchReferencesLink()
                         .pipe(first())
-                        .subscribe(r => r && h.push(r)),
+                        .subscribe(r => {
+                            if (r) {
+                                h.push(r)
+                            } else {
+                                alert('Must add repositories before finding references')
+                            }
+                        }),
             },
             {
                 id: 'enabledSignOn',
