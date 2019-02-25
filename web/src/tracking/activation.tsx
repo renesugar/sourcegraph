@@ -64,7 +64,7 @@ const fetchActivationStatus = (isSiteAdmin: boolean) => () =>
                       currentUser {
                           usageStatistics {
                               searchQueries
-                              findRefsActions
+                              findReferencesActions
                           }
                       }
                   }
@@ -74,7 +74,7 @@ const fetchActivationStatus = (isSiteAdmin: boolean) => () =>
                       currentUser {
                           usageStatistics {
                               searchQueries
-                              findRefsActions
+                              findReferencesActions
                           }
                       }
                   }
@@ -85,7 +85,8 @@ const fetchActivationStatus = (isSiteAdmin: boolean) => () =>
             const authProviders = window.context.authProviders
             const completed: { [key: string]: boolean } = {
                 didSearch: !!data.currentUser && data.currentUser.usageStatistics.searchQueries > 0,
-                'action:findReferences': !!data.currentUser && data.currentUser.usageStatistics.findRefsActions > 0,
+                'action:findReferences':
+                    !!data.currentUser && data.currentUser.usageStatistics.findReferencesActions > 0,
             }
             if (isSiteAdmin) {
                 completed.connectedCodeHost = data.externalServices && data.externalServices.totalCount > 0
@@ -105,7 +106,7 @@ const fetchActivationStatus = (isSiteAdmin: boolean) => () =>
  *
  * @param isSiteAdmin determines if site-admin-only activation steps are included.
  */
-export const newActivationStatus = (isSiteAdmin: boolean) => {
+export const createActivationStatus = (isSiteAdmin: boolean) => {
     const s = new ActivationStatus(
         [
             {
@@ -151,7 +152,9 @@ export const newActivationStatus = (isSiteAdmin: boolean) => {
         fetchActivationStatus(true)
     )
 
-    // Subscribe to activation events that require server updates
+    // Subscribe to activation events that require server updates.
+    // Only certain events require server updates here, because others
+    // trigger server updates elsewhere.
     s.updateCompleted.subscribe(u => {
         if (u['action:findReferences']) {
             logUserEvent(GQL.UserEvent.CODEINTELREFS)
